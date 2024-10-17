@@ -19,10 +19,32 @@ jobs:
     - name: Set up Go
       uses: actions/setup-go@v4
       with:
-        go-version: '1.20'
+        go-version: '1.22'
 
     - name: Build
-      run: go build -v ./...
+      run: go build -o go-smtp
 
-    - name: Test
-      run: go test -v ./...
+    - name: Set outputs
+      id: vars
+      run: echo "sha_short=$(git rev-parse --short HEAD)" >> $GITHUB_OUTPUT
+        
+    - name: Create GitHub Release
+      id: create_release
+      uses: actions/create-release@v1
+      env:
+        GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+      with:
+          tag_name: ${{ steps.vars.outputs.sha_short }}
+          release_name: "Release ${{ steps.vars.outputs.sha_short }}"
+          draft: false
+          prerelease: false
+          
+    - name: Upload Release Asset
+      uses: actions/upload-release-asset@v1
+      env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}  # This is automatically provided by GitHub Actions
+      with:
+          upload_url: ${{ steps.create_release.outputs.upload_url }}
+          asset_path: ./go-smtp
+          asset_name: go-smtp  
+          asset_content_type: application/octet-stream
