@@ -26,3 +26,13 @@ jobs:
 
     - name: Test
       run: go test -v ./...
+  
+    - name: Upload Release Asset
+      uses: actions/upload-release-asset@v1
+      env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}  # This is automatically provided by GitHub Actions
+      with:
+          upload_url: ${{ github.event.release.upload_url }}
+          asset_path: ./myapp  # Path to the built binary
+          asset_name: myapp  # Name of the asset file
+          asset_content_type: application/octet-stream
