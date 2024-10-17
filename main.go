@@ -2,13 +2,33 @@ package main
 
 import (
 	"fmt"
+	"net"
 	"net/smtp"
 	"os"
 	"strconv"
 	"strings"
+	"time"
 )
 
 func main() {
+	host := "www.google.com"
+	port := "443"
+	timeout := time.Duration(1 * time.Second)
+
+	try := 0
+	for {
+		_, err := net.DialTimeout("tcp", host+":"+port, timeout)
+		if err != nil {
+			fmt.Printf("%s %s %s\n", host, "not responding", err.Error())
+		} else {
+			fmt.Printf("%s %s %s\n", host, "responding on port:", port)
+		}
+		try += 1
+		if try > 7 {
+			break
+		}
+	}
+
 	mail := os.Getenv("MAIL_TO")
 	fmt.Println(mail)
 	err := SendEmail([]string{mail}, "", []byte{})
